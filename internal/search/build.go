@@ -8,6 +8,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"regexp"
 
 	"github.com/alist-org/alist/v3/internal/conf"
 	"github.com/alist-org/alist/v3/internal/errs"
@@ -153,7 +154,17 @@ func BuildIndex(ctx context.Context, indexPaths, ignorePaths []string, maxDepth 
 				return filepath.SkipDir
 			}
 			for _, avoidPath := range ignorePaths {
-				if strings.HasPrefix(indexPath, avoidPath) {
+				// if !strings.HasPrefix(avoidPath, "/") {
+				// 	if strings.Contains(indexPath, avoidPath) {
+				// 		return filepath.SkipDir
+				// 	}
+				// }
+				// if strings.HasPrefix(indexPath, avoidPath) {
+				// 	return filepath.SkipDir
+				// }
+				// utils.Log.Infof("build index for %+v checking pattern %+v", indexPath, avoidPath)
+				if regexp.MustCompile(avoidPath).MatchString(indexPath) {
+					utils.Log.Infof("build index for %+v, skip due to %+v", indexPath, avoidPath)
 					return filepath.SkipDir
 				}
 			}
